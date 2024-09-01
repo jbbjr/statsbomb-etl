@@ -69,7 +69,7 @@ The resulting dataset includes:
 2. Player identifiers and names
 3. Injury occurrence (substitution due to injury)
 4. Match duration until injury (in minutes)
-5. Distance covered by the player before injury
+5. Distance covered by the player before injury (in ft)
 6. Team and stadium information
 7. Weather conditions (temperature, humidity, precipitation, general conditions)
 
