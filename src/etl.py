@@ -216,4 +216,4 @@ if __name__ == "__main__":
     print("Running ETL process for testing locally...")
     matches = sb.matches(competition_id=44, season_id=107)  # MLS 2023 season (set the scheduler to run based off of match schedule and statsbomb upload schedule)
     run_etl(matches)
-    query_database()    # A double to verify the data was loaded correctly
+    query_database()    # A double-check to verify the data was loaded correctly
