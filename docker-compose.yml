@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+
+  init:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - ./init.sh:/init.sh
+    entrypoint: ["/bin/bash", "/init.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /opt/airflow/airflow-webserver-ready ]"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  webserver:
+    build: .
+    depends_on:
+      init:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src  # Add this line
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/opt/airflow  # Add this line
+    command: airflow webserver
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  scheduler:
+    build: .
+    depends_on:
+      webserver:
+        condition: service_healthy
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src  # Add this line
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/opt/airflow  # Add this line
+    command: airflow scheduler
+
+  init-cleanup:
+    image: docker:cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      webserver:
+        condition: service_healthy
+      scheduler:
+        condition: service_started
+    command: >
+      sh -c "
+        echo 'Waiting for services to be fully up...' &&
+        sleep 30 &&
+        echo 'Stopping init service...' &&
+        docker stop dcu-etl-init-1 &&
+        echo 'Init service stopped.'
+      "
