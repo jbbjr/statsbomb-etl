@@ -165,9 +165,6 @@ def load_data(data):
         """)
         cur.execute("TRUNCATE TABLE injuries")
 
-        # Print the first few rows to verify the order
-        print("Data sample:", data.head())  
-
         execute_values(cur, 
             "INSERT INTO injuries (key, match_id, player_id, player, substitution_outcome, minute, \
             distance_covered, match_date, kick_off, home_team, stadium, city, temp, dew, humidity, precip, conditions) VALUES %s",
