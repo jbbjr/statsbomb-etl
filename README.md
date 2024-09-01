@@ -1,3 +1,5 @@
+![SBbanner](images/statsbomb.png)
+
 # StatsBomb to AWS RDS ETL Pipeline for Injury Prediction
 
 ## Project Overview
